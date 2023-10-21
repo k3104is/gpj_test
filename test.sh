@@ -52,7 +52,7 @@ do
   echo ${GPJ_RELATIVE_PATH}
   # expand gpj file
   # for line in $(cat "${gpj}")
-  while read line;
+  while IFS= read -r line;
   do
     # if include mismatch, skip
     if [[ ! "${line}" =~ ${MATCH_PTN} || "${line}" =~ ${MISMATCH_PTN} ]] 
