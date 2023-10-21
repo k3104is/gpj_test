@@ -1,16 +1,35 @@
 #!/bin/bash
+
+# patterns
+PTN1="^\."
+
+# search gpj on ./a
 for gpj in $(find ./a -type f | grep "gpj")
 do
+  # path relative from gpj to pj(./)
   GPJ_RELATIVE_PATH=$(realpath --relative-to=$(dirname ${gpj}) ./)
   echo ${GPJ_RELATIVE_PATH}
+  # chk gpj file
   for line in $(cat ${gpj})
   do
     echo ${line}
+    # search src file on ./b
     file2=$(find ./b -type f | grep $(echo ${line} | gawk -F/ '{print $NF}'))
     echo ${file2}
+    echo "### change path to ./b ###"
+    echo ${file2} | sed -e 's,${PTN1},${GPJ_RELATIVE_PATH},g'
+    echo ${file2//${PTN1}/${GPJ_RELATIVE_PATH}}
   done
 done
 
+
+echo "#######"
+x=1234
+echo $x | grep -E "^[0-9][0-9]*$" > /dev/null 2>&1
+if [ $? -eq 0 ]; then echo "x is number"; else echo "x is not number"; fi
+# if [ $? -eq 0 ]; then continue; fi
+echo "abcde" | grep -q "abc" && echo "true"
+# if [ $? -eq 0 ]; then echo "true"; else echo "false"; fi
 
 echo "#######"
 
