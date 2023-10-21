@@ -54,12 +54,9 @@ do
   # expand gpj file
   for line in $(cat ${gpj})
   do
-    # extract .c/.h/.txt
-    # if echo ${line} | grep -Eq ${PTN2}; 
-    if [[ ${line} =~ ${MATCH_PTN} && ! ${line} =~ ${MISMATCH_PTN} ]] 
+    # if include mismatch, skip
+    if [[ ! ${line} =~ ${MATCH_PTN} || ${line} =~ ${MISMATCH_PTN} ]] 
     then
-      :
-    else
       echo ${line} >> ${DIR_GPJBAK}
       continue
     fi
