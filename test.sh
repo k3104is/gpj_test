@@ -6,7 +6,7 @@ DIR2="./b"
 
 # patterns
 PTN1="^\.\/"
-MATCH_PTN="^.*(\.c|\.h|\.txt) *$"
+MATCH_PTN="^.*(\-I.*)|((\.c|\.h|\.txt) *)$"
 MISMATCH_PTN="^.*(cfg|integ).*$"
 
 #func
@@ -30,7 +30,7 @@ relative_dir_func() {
           file1_dir="${file1_dir%/*}"
           common_part="${common_part}../"
       done
-      relative_path="${common_part}${file2}"
+      relative_path="${common_part}""${file2}"
   fi
 
   echo ${relative_path}
@@ -38,43 +38,54 @@ relative_dir_func() {
 
 # main
 # search gpj on ./a
-for gpj in $(find ${DIR1} -type f | grep -E "gpj$")
+for gpj in $(find "${DIR1}" -type f | grep -E "gpj$")
 do
   # create gpj.bak on same dir
   DIR_GPJBAK="${gpj%/*}/gpj.bak"
-  rm ${DIR_GPJBAK} > /dev/null 2>&1
-  touch ${DIR_GPJBAK}
+  rm "${DIR_GPJBAK}" > /dev/null 2>&1
+  touch "${DIR_GPJBAK}"
 
   # path relative from gpj to pj(./)
   # GPJ_RELATIVE_PATH=$(realpath --relative-to=$(dirname ${gpj}) ./)
-  file_dir=$(relative_dir_func ${gpj} "./")
-  GPJ_RELATIVE_PATH=${file_dir%/./}
+  file_dir=$(relative_dir_func "${gpj}" "./")
+  GPJ_RELATIVE_PATH="${file_dir%/./}"
   echo ${GPJ_RELATIVE_PATH}
-
   # expand gpj file
-  for line in $(cat ${gpj})
+  # for line in $(cat "${gpj}")
+  while read line;
   do
     # if include mismatch, skip
-    if [[ ! ${line} =~ ${MATCH_PTN} || ${line} =~ ${MISMATCH_PTN} ]] 
+    if [[ ! "${line}" =~ ${MATCH_PTN} || "${line}" =~ ${MISMATCH_PTN} ]] 
     then
-      echo ${line} >> ${DIR_GPJBAK}
+      echo "${line}" >> ${DIR_GPJBAK}
       continue
     fi
 
-    # search src file on ./b
-    file=$(find ${DIR2} -type f | grep ${line##*/})
-    # found
-    if [ -n "${file}" ];
-    then 
-      echo ${file/./${GPJ_RELATIVE_PATH}} >> ${DIR_GPJBAK}
-    # not found
+    # create dir
+    if [[ "${line}" =~ "-I" ]];
+    then
+      # :
+      echo "${line%%I*}I ${GPJ_RELATIVE_PATH}${DIR2#.}${line#*.}" >> "${DIR_GPJBAK}"
     else
-      echo "\`${line}\` is not found" >> ${DIR_GPJBAK}
+      echo "${GPJ_RELATIVE_PATH}${DIR2#.}${line#.}" >> "${DIR_GPJBAK}"
     fi
-  done
+    # # search src file on ./b
+    # file=$(find ${DIR2} -type f | grep ${line##*/})
+    # # found
+    # if [ -n "${file}" ];
+    # then 
+    #   echo ${file/./${GPJ_RELATIVE_PATH}} >> ${DIR_GPJBAK}
+    #   echo "${GPJ_RELATIVE_PATH}"${DIR2#.}"${line#.}" >> ${DIR_GPJBAK}
+    # # not found
+    # else
+    #   echo "\`${line}\` is not found" >> ${DIR_GPJBAK}
+    # fi
+  # done
+  done < <(cat "${gpj}")
+
   echo "### cat ${DIR_GPJBAK} ###"
-  cat ${DIR_GPJBAK}
-  rm ${DIR_GPJBAK} > /dev/null 2>&1
+  cat "${DIR_GPJBAK}"
+  rm "${DIR_GPJBAK}" > /dev/null 2>&1
 
 done
 

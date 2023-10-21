@@ -3,4 +3,5 @@
 aiueo
 xxxxx
 dummy.c.dummy
--I ./bbb.h
+  -I ./
+  -I ./ccc/ddd/eee

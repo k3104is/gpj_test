@@ -3,3 +3,4 @@
 ./cc/ccc.c
 ./bb/test_cfg.c
 aiueo
+  -I ./bb/
