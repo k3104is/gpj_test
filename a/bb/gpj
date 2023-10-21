@@ -1,5 +1,6 @@
-./bbb.txt
+./bbb.c
 ./test_cfg.c
 aiueo
 xxxxx
 dummy.c.dummy
+-I ./bbb.h
